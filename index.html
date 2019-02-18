@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <title>Sea fight</title>
+    <style>
+        div {
+            width: 300px;
+            height: 300px;
+            float: left;
+            margin-right: 10px;
+        }
+
+        div button {
+            width: 30px;
+            height: 30px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="player"></div>
+<div id="enemy"></div>
+
+
+<script>
+$(function () {
+    const fieldCells = [];
+    const playerField = $("#player");
+    const enemyField = $("#enemy");
+    const pPos = [];
+    const ePos = [];
+
+    initGame();
+
+    enemyField.children("button").click(function () {
+        makeMove(this.id, ePos, enemyField);
+        makeMove(positionIndexToHit(), pPos, playerField);
+    });
+
+    function makeMove(cellId, shipsPositions, field) {
+        if (allShipsKilled()) {
+            showWinner();
+            enemyField.children("button").off();
+            return;
+        }
+
+        console.log("position To Hit:", cellId);
+        let cell = $("#" + cellId, field);
+        if ($.inArray(cellId, shipsPositions) !== -1) {
+            let index = shipsPositions.indexOf(cellId);
+            shipsPositions.splice(index, 1);
+            cell.text("X").css('color', 'red');
+        } else {
+            cell.text("-");
+        }
+        cell.prop("disabled", true);
+    }
+
+    function positionIndexToHit() {
+        let index = getRandomInt(0, fieldCells.length);
+        let cellId = fieldCells[index];
+        fieldCells.splice(index, 1);
+        return cellId;
+    }
+
+    function allShipsKilled() {
+        console.log(`pPos: ${pPos}; ePos: ${ePos}`);
+        return (ePos.length == 0 || pPos.length == 0) ? true : false;
+    }
+
+    function showWinner() {
+        alert(ePos.length == 0 ? "You Won ! :)" : "Enemy won! :(");
+    }
+
+    function initGame() {
+        generateField("div");
+        generateShips(pPos);
+        generateShips(ePos);
+        showMyShips(pPos);
+    }
+
+    function generateShips(field) {
+        field.push("2B", "3B", "4B", "1F", "7G", "7H", "7I");
+    }
+
+    function showMyShips(shipsPositions) {
+        playerField.children("button")
+            .prop("disabled", true)
+            .filter((i, elem) => $.inArray(elem.id, shipsPositions) !== -1)
+            .text("∆").css('color', 'blue');
+    }
+
+    function generateField(element) {
+        let alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+
+        for (let i = 1; i <= 10; i++) {
+            for (let j = 0; j < alphabet.length; j++) {
+                let btn = $('<button/>', {
+                    text: i + alphabet[j],
+                    id: i + alphabet[j],
+                    //click: function() {console.log(this.id);}
+                });
+
+                fieldCells.push(i + alphabet[j]);
+                $(element).append(btn);
+            }
+        }
+    };
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
+});
+</script>
+</body>
+</html>
